@@ -2,7 +2,7 @@ import { FindUser, Registerservice } from "../services/userService.js";
 import User from "../schema/userSchema.js";
 import bcrypt from 'bcrypt';
 import { generateToken } from "../utils/generatetoken.js";
-import { findbyid, findbyidanddelete } from "../repository/userRepo.js";
+import { findAllUser, findbyid, findbyidanddelete } from "../repository/userRepo.js";
 import cloudinary from "../config/Cloudinary.js";
 
 export const CreateAccount = async (req, res) => {
@@ -198,5 +198,125 @@ export const deleteProfile=async(req,res)=>{
     })
     }
 }
-
-
+export const getProfileById=async(req,res)=>{
+    try{
+        const id=req.params.id;
+        const user=await findbyid(id);
+        if(!user)
+        {
+            return res.status(401).json({
+                message:'User not found',
+                success:false
+            })
+        }
+        return res.status(201).json({
+            user,
+            success:true
+        })
+    }
+    catch(error)
+    {
+        return res.status(501).json({
+            message:"Internal server error",
+            success:false
+        })
+    }
+}
+export const getUserProfile=async(req,res)=>{
+    try{
+        const id=req.user.id;
+        const user=await findbyid(id);
+        if(!user)
+        {
+            return res.status(401).json({
+                message:'User not found',
+                success:true
+            })
+        }
+        return res.status(201).json({
+         user,
+         success:true
+        })
+    }catch(error)
+    {
+        return res.status(501).json({
+            message:'Internal server error',
+            success:false
+        })
+    }
+}
+export const followOrUnfollow = async (req, res) => {
+    try {
+      const whowillfollowId = req.user.id; 
+      const whomToFollowId = req.params.id; 
+  console.log(whomToFollowId,whowillfollowId)
+     
+      const whoWillFollowUser = await User.findById(whowillfollowId);
+      const whomToFollowUser = await User.findById(whomToFollowId);
+      if(whowillfollowId==whomToFollowId)
+      {
+        return res.status(401).json({
+            message:"Can not follow or unfollow yourself",
+            success:false
+        })
+      }
+    
+      if (!whoWillFollowUser || !whomToFollowUser) {
+        return res.status(404).json({
+          message: "User not found",
+          success: false,
+        });
+      }
+  
+      
+      if (whomToFollowUser.followers.includes(whowillfollowId)) {
+       
+        await User.findByIdAndUpdate(whomToFollowId, { $pull: { followers: whowillfollowId } });
+        await User.findByIdAndUpdate(whowillfollowId, { $pull: { following: whomToFollowId } });
+  
+        return res.status(200).json({
+          message: "Unfollowed successfully",
+          success: true,
+        });
+      } else {
+       
+        await User.findByIdAndUpdate(whomToFollowId, { $push: { followers: whowillfollowId } });
+        await User.findByIdAndUpdate(whowillfollowId, { $push: { following: whomToFollowId } });
+  
+        return res.status(200).json({
+          message: "Followed successfully",
+          success: true,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        message: "Internal server error",
+        success: false,
+        error: error.message,
+      });
+    }
+  };
+  export const getAllUser=async(req,res)=>{
+    try{
+        const users=await findAllUser();
+         if(!users)
+         {
+            return res.status(401).json({
+                message:"no user yet",
+                users
+            })
+         }
+         return res.status(201).json({
+            users,
+            success:true
+         })
+    }
+    catch(error)
+    {
+        return res.status(501).json({
+            message:"Internal server error",
+            success:false
+        })
+    }
+  }
+  

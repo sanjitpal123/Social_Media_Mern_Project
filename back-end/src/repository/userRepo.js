@@ -38,3 +38,12 @@ export const findbyidanddelete=async(id)=>{
         throw error;
     }
 }
+export const findAllUser=async(req,res)=>{
+    try{
+        const users=await User.find({});
+        return users;
+    }catch(error)
+    {
+        throw error;
+    } 
+}
