@@ -1,17 +1,26 @@
-import { useState } from 'react'
-
-import './App.css'
+import React, { useContext } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./component/Login";
+import Signup from "./component/Signup";
+import Homepage from "./pages/Homepage";
+import UserContext from "./context/userProvider";
 
 function App() {
- 
+  const { authUser } = useContext(UserContext);
 
   return (
-    <div className='w-[200px] h-[300px] bg-red-300'>
-      <p>flkdf</p>
+    <Router>
+      <Routes>
+       
+        <Route path="/home" element={authUser ? <Homepage /> : <Navigate to="/login" />} />
       
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Signup />} />
      
-    </div>
-  )
+        <Route path="*" element={<Navigate to={authUser ? "/home" : "/login"} />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
