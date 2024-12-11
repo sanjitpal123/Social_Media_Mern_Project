@@ -22,7 +22,7 @@ export const findPostById=async(id)=>{
 }
 export const GetAllPost=async()=>{
     try{
-        const posts=await Post.find({});
+        const posts=await Post.find({}).sort({createdAt:-1}).populate('user','fullname profilePicture');
         return posts;
     }catch(error){
         throw error;

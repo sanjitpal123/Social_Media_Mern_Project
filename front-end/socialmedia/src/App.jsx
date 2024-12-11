@@ -7,6 +7,7 @@ import UserContext from "./context/userProvider";
 
 function App() {
   const { authUser } = useContext(UserContext);
+  console.log('user',authUser);
 
   return (
     <Router>

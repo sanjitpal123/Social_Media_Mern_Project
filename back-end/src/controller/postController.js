@@ -3,52 +3,52 @@ import { findPostById } from "../repository/postRepo.js";
 import Post from "../schema/PostSchema.js";
 import { CreatePostService, findPostByIdService, GetAllPosts } from "../services/postService.js";
 
-export const CreatePost=async(req,res)=>{
-    try{
-        const {caption}=req.body;
-        const content=req.file;
-        const userid=req.user.id;
-        if(!caption || !content){
-            return res.status(401).json({
-                message:"Something is missing",
-                success:false
-            })
-        }
-        let uploaded;
-        if(content.mimetype.startsWith("image/"))
-        {
-            uploaded=cloudinary.uploader.upload(content.path,{resource_type:'image'});
-        }
-        else if(content.mimetype.startsWith("video/"))
-        {
-            uploaded=cloudinary.uploader.upload(content.path,{resource_type:"video"});
-        }
-        else {
-            return res.status(401).json({
-                message:"Invalid file type",
-                success:false
-            })
-        }
-        const upj={
-            caption:caption,
-            content:(await uploaded).secure_url,
-            user:userid
-        }
-        const newPost=await CreatePostService(upj);
-        return res.status(201).json({
-            message:"Post created successfully",
-            newPost,
-            success:true
-        })
+export const CreatePost = async (req, res) => {
+    try {
+      console.log("Caption:", req.body.caption); // Debugging
+      console.log("File:", req.file); // Debugging
+  
+      const { caption } = req.body;
+      const content = req.file;
+  
+      if (!caption) {
+        return res.status(400).json({
+          message: "Caption is missing",
+          success: false,
+        });
+      }
+  
+      if (!content) {
+        return res.status(400).json({
+          message: "File is required",
+          success: false,
+        });
+      }
+  
+      const uploaded = await cloudinary.uploader.upload(content.path, {
+        resource_type: content.mimetype.startsWith("image/") ? "image" : "video",
+      });
+  
+      const newPost = await CreatePostService({
+        caption,
+        content: uploaded.secure_url,
+        user: req.user.id,
+      });
+  
+      return res.status(201).json({
+        message: "Post created successfully",
+        newPost,
+        success: true,
+      });
+    } catch (error) {
+      console.error("Error in CreatePost:", error);
+      return res.status(500).json({
+        message: "Internal server error",
+        success: false,
+      });
     }
-    catch(error)
-    {
-        return res.status(501).json({
-            message:"Internal server error",
-            success:false
-        })
-    }
-}
+  };
+  
 export const editPost=async(req,res)=>{
     try{
         const {caption}=req.body;

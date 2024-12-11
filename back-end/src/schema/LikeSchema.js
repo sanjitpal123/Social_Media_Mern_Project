@@ -16,7 +16,7 @@ const likeSchema = new mongoose.Schema({
         required: true,
         enum: ["post", "comment"] // Define allowed models
     }
-});
+}, { timestamps: true });
 
 const Like= mongoose.model('Like', likeSchema);
 export default Like;
